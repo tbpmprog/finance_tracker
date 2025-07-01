@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Финансовый помощник</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Финансовый помощник</h1>
+
+    <div class="import-export">
+      <button id="exportBtn">Экспорт</button>
+      <button id="importBtn">Импорт</button>
+      <input type="file" id="importFileInput" style="display: none;" accept=".json">
+    </div>
+
+    <div class="controls">
+      <button id="prevMonth">◀</button>
+      <span id="currentMonth"></span>
+      <button id="nextMonth">▶</button>
+    </div>
+
+    <section>
+      <h2>Доходы</h2>
+      <form id="incomeForm">
+        <input type="date" id="incomeDate" required />
+        <input type="number" step="0.01" id="incomeAmount" placeholder="Сумма" required />
+        <input type="text" id="incomeDescription" placeholder="Описание" />
+        <label><input type="checkbox" id="incomeRecurring" /> Повторять ежемесячно</label>
+        <input type="month" id="incomeRepeatUntil" placeholder="Дата окончания" style="display:none;"/>
+        <button type="submit">Добавить</button>
+      </form>
+      <ul id="incomeList"></ul>
+      <p><strong>Итого доходов:</strong> <span id="incomeTotal">0 ₽</span></p>
+    </section>
+
+    <section>
+      <h2>Расходы</h2>
+      <form id="expenseForm">
+        <input type="date" id="expenseDate" required />
+        <input type="number" step="0.01" id="expenseAmount" placeholder="Сумма" required />
+        <input type="text" id="expenseDescription" placeholder="Описание" />
+        <label><input type="checkbox" id="expenseRecurring" /> Повторять ежемесячно</label>
+        <input type="month" id="expenseRepeatUntil" placeholder="Дата окончания" style="display:none;"/>
+        <button type="submit">Добавить</button>
+      </form>
+      <ul id="expenseList"></ul>
+      <p><strong>Итого расходов:</strong> <span id="expenseTotal">0 ₽</span></p>
+    </section>
+
+    <section>
+      <h2>Баланс</h2>
+      <p><strong>Разница:</strong> <span id="balance">0 ₽</span></p>
+      <p><strong>Процент доходов после расходов:</strong> <span id="balancePercent">0%</span></p>
+    </section>
+
+    <section>
+      <h2>Визуализация</h2>
+      <!-- <div class="chart-container"> -->
+        <h3>Соотношение доходов и расходов</h3>
+        <canvas id="summaryChart" width="400" height="400"></canvas>
+      <!-- </div> -->
+    </section>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
