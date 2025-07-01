@@ -19,10 +19,15 @@ const incomeRecurringCheckbox = document.getElementById('incomeRecurring');
 const incomeRepeatUntilInput = document.getElementById('incomeRepeatUntil');
 const expenseRecurringCheckbox = document.getElementById('expenseRecurring');
 const expenseRepeatUntilInput = document.getElementById('expenseRepeatUntil');
+const viewModeCheckbox = document.getElementById('viewModeCheckbox');
 
 let currentDate = new Date();
 let currentMonth = currentDate.getMonth();
 let currentYear = currentDate.getFullYear();
+
+const storedUseOnlyUpToTodayValue = localStorage.getItem('useOnlyUpToToday');
+let useOnlyUpToToday = storedUseOnlyUpToTodayValue === null ? 1 : storedUseOnlyUpToTodayValue === 'true' ? 1 : 0;
+viewModeCheckbox.checked = useOnlyUpToToday ? true : false;
 
 function formatMonthYear(month, year) {
   return new Date(year, month).toLocaleString('ru-RU', { month: 'long', year: 'numeric' });
@@ -159,6 +164,73 @@ function renderSummaryChart(incomes, expenses) {
   });
 }
 
+let dailyChart;
+
+function renderDailyChart(incomes, expenses) {
+  const maxDay = new Date(currentYear, currentMonth + 1, 0).getDate();
+
+  const labels = Array.from({ length: maxDay }, (_, i) => String(i + 1).padStart(2, '0'));
+
+  const dailyIncome = Array(maxDay).fill(0);
+  const dailyExpense = Array(maxDay).fill(0);
+
+  incomes.forEach(income => {
+    const incomeDate = new Date(income.date);
+    const day = incomeDate.getDate();
+
+    dailyIncome[day - 1] += income.amount;
+  })
+
+  expenses.forEach(expense => {
+    const expenseDate = new Date(expense.date);
+    const day = expenseDate.getDate();
+
+    dailyExpense[day - 1] += expense.amount;
+  })
+
+  const ctx = document.getElementById('dailyChart').getContext('2d');
+
+  if (dailyChart) {
+    dailyChart.destroy();
+  }
+
+  dailyChart = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [
+        {
+          label: 'Доходы',
+          data: dailyIncome,
+          backgroundColor: '#9ecba1'
+        },
+        {
+          label: 'Расходы',
+          data: dailyExpense,
+          backgroundColor: '#e9747a'
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { position: 'top' },
+        title: { display: false }
+      },
+      scales: {
+        x: {
+          title: { display: true, text: 'День месяца' }
+        },
+        y: {
+          title: { display: true, text: 'Сумма' },
+          beginAtZero: true
+        }
+      }
+    }
+  });
+}
+
 function render() {
   currentMonthEl.textContent = formatMonthYear(currentMonth, currentYear);
   const ym = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}`;
@@ -234,8 +306,8 @@ function render() {
     return d <= today;
   });
 
-  const incomeSum = filteredIncomes.reduce((sum, i) => sum + i.amount, 0);
-  const expenseSum = filteredExpenses.reduce((sum, i) => sum + i.amount, 0);
+  const incomeSum = useOnlyUpToToday ? filteredIncomes.reduce((sum, i) => sum + i.amount, 0) : incomesToShow.reduce((sum, i) => sum + i.amount, 0);
+  const expenseSum = useOnlyUpToToday ? filteredExpenses.reduce((sum, i) => sum + i.amount, 0) : expensesToShow.reduce((sum, i) => sum + i.amount, 0);
   const balance = incomeSum - expenseSum;
   const percent = incomeSum > 0 ? ((balance / incomeSum) * 100).toFixed(2) : 0;
 
@@ -246,7 +318,14 @@ function render() {
   balancePercentEl.textContent = (balance >= 0 ? '+' : '') + percent + '%';
   balancePercentEl.className = balance < 0 ? 'negative-balance' : '';
 
-  renderSummaryChart(filteredIncomes, filteredExpenses);
+  if (useOnlyUpToToday) {
+    renderSummaryChart(filteredIncomes, filteredExpenses);
+    renderDailyChart(filteredIncomes, filteredExpenses);
+  } else {
+    renderSummaryChart(incomesToShow, expensesToShow);
+    renderDailyChart(incomesToShow, expensesToShow);
+  }
+
 }
 
 prevMonthBtn.onclick = () => {
@@ -384,6 +463,12 @@ importInput.addEventListener('change', (event) => {
     }
   };
   reader.readAsText(file);
+});
+
+document.getElementById('viewModeCheckbox').addEventListener('change', (e) => {
+  useOnlyUpToToday = e.target.checked;
+  localStorage.setItem('useOnlyUpToToday', useOnlyUpToToday);
+  render();
 });
 
 data.incomes = loadData('incomes');

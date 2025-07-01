@@ -25,6 +25,15 @@
     </div>
 
     <section>
+      <div class="view-mode-toggle" style="text-align: center; margin-bottom: 20px;">
+        <label>
+          <input type="checkbox" id="viewModeCheckbox" />
+          Только текущие
+        </label>
+      </div>
+    </section>
+
+    <section>
       <h2>Доходы</h2>
       <form id="incomeForm">
         <input type="date" id="incomeDate" required />
@@ -60,10 +69,15 @@
 
     <section>
       <h2>Визуализация</h2>
-      <!-- <div class="chart-container"> -->
+      <div class="chart-container">
         <h3>Соотношение доходов и расходов</h3>
         <canvas id="summaryChart" width="400" height="400"></canvas>
-      <!-- </div> -->
+      </div>
+
+      <div class="chart-container">
+        <h3>Доходы и расходы по дням</h3>
+        <canvas id="dailyChart" height="120"></canvas>
+      </div>
     </section>
   </div>
 
